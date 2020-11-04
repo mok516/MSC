@@ -1,0 +1,64 @@
+---
+title: "case_study"
+author: "Molly K"
+date: "04/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                      warning = FALSE,
+                      message = FALSE,
+                      fig.retina = 3)
+```
+
+# Introduction
+Analysis will be caried out on *proteomic* data from *five* immortalised **mesenchymal stromal cell (MSC)** lines. The data will be reorganised to **tidy** it.
+
+## Method
+```{r packages}
+library(janitor)
+library(tidyverse)
+```
+
+<!-- read in data -->
+```{r data}
+filesol <- "C:/Users/molsk/R work/Stage 3/MSC//raw_data/Y101_Y102_Y201_Y202_Y101-5.csv"
+# skip out the first 2 lines of code and clean 
+sol <- read_csv(filesol, skip = 2) %>% 
+  janitor::clean_names()
+# filter out bovine serum proteins and filter out those with fewer than 2 proteins detected (lack of identity confidence)
+# keep rows of human proteins identified by more than 1 protein
+sol <- sol %>% 
+  filter(str_detect(description, "OS=Homo sapiens")) %>% 
+  filter(x1pep == "x")
+
+```
+
+<!-- processing the contents -->
+```{r processing}
+# extracting gene names from one row
+sol$description[1]
+one_description <- sol$description[1]
+str_extract(one_description, "GN=[^\\s]+") %>% 
+  str_replace("GN=", "")
+# carry out on all 
+sol2 <- sol %>%
+  mutate(genename =  str_extract(description,"GN=[^\\s]+") %>% 
+           str_replace("GN=", ""))
+# repeat with gene accession
+two_description <- sol$accession[1]
+two_description
+
+str_extract(two_description, "1::[^\\s]+")%>% 
+  str_replace("1::", "")
+
+sol3 <- sol2 %>%
+  mutate(accession =  str_extract(two_description,"1::=[^\\s]+") %>% 
+           str_replace("1::", ""))
+sol3
+```
+
+### Results 
+
+#### Discussion 
